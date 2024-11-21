@@ -1,4 +1,4 @@
 # novabot
 
-Tentative project for Programming User Interfaces
+Tentative project for Programming User Interfaces.
 
