@@ -1,93 +1,102 @@
-# Novabot: A Burroughs-Inspired Cut-Up Language Model  
+# **Cut-up text generator**  
+*A vocabulary-constrained text generator mimicking William S. Burroughs' style*
 
-![GitHub](https://img.shields.io/badge/license-MIT-blue)  
-![Python](https://img.shields.io/badge/Python-3.8%2B-green)  
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red)  
-![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-yellow)  
+## **Overview**  
+This project generates original passages in the style of *Naked Lunch*, using **only a user-provided vocabulary list** (`hoard.txt`). It combines:  
+1. **Markov Chains** (for structured, vocabulary-safe drafts)  
+2. **GPT-2 Fine-Tuning** (for stylistic expansion)  
 
-Novabot is a fine-tuned language model that emulates the **"cut-up" technique** pioneered by experimental writer **William S. Burroughs**. By algorithmically rearranging a curated "word hoard" extracted from Burroughs' novels, Novabot generates surreal, fragmented prose in the spirit of *Naked Lunch* and *Nova Express*.  
+Ideal for constrained creativity exercises or experimental writing.  
 
-## 🔮 Inspiration  
+---
 
-The project is based on the apocryphal **"Word Hoard"**—a lost manuscript Burroughs allegedly compiled between 1954 and 1958. This 1000-page collection of words and phrases was physically cut up and reassembled into his *Nova Trilogy* (*The Soft Machine*, *The Ticket That Exploded*, *Nova Express*) and *Naked Lunch*.  
+## **Workflow**  
+### **1. Inputs**  
+- **`hoard.txt`**: Your vocabulary list (one word per line).  
+- **`naked_lunch.txt`**: Raw text of *Naked Lunch* for style learning.  
 
-Novabot revives this method computationally, using **GPT-2 fine-tuning** and **constrained vocabulary generation** to produce Burroughs-esque cut-ups.  
+### **2. Key Steps**  
+#### **A. Markov Chain Setup**  
+- Extracts word transitions from *Naked Lunch* using only `hoard.txt` words.  
+- Generates coherent but simple "seed" phrases (e.g., `"junk whispers through syringe streets"`).  
 
-## ⚙️ Technical Approach  
+#### **B. GPT-2 Fine-Tuning** *(Optional)*  
+- Trains a GPT-2 model on *Naked Lunch* to learn Burroughs’ style.  
+- Saved to `./results` for reuse.  
 
-1. **Data Extraction & Word Hoard Creation**  
-   - Processed Burroughs' novels (*Naked Lunch*, *The Soft Machine*, *The Ticket That Exploded*, *Nova Express*) as text files.  
-   - Used **NumPy** to compute the **intersection of words** across all texts, forming a constrained vocabulary.  
-   - Filtered out digits, symbols, and noise to refine the word set.  
+#### **C. Hybrid Generation**  
+1. **Markov Chain** creates a seed phrase.  
+2. **GPT-2** expands it into a richer passage, constrained by `hoard.txt`.  
 
-2. **Model Fine-Tuning**  
-   - Loaded **GPT-2** (via HuggingFace `transformers`) and fine-tuned on *Naked Lunch* to capture Burroughs' style.  
-   - Implemented **prompt engineering** to enforce vocabulary constraints from the word hoard.  
-   - Used **PyTorch** for training (limited by GPU resources).  
+---
 
-3. **Generation Method**  
-   - Outputs are produced via **constrained decoding**, ensuring words are drawn from the curated hoard.  
-   - Future improvements could involve **beam search** or **top-k sampling** for more coherent cut-ups.  
-
-## 🚀 Future Work  
-
-- Experiment with **Llama 3 or GPT-4** for richer outputs (requires GPU scaling).  
-- Develop a **web interface** (Flask/Streamlit) for interactive cut-up generation.  
-- Expand the word hoard with additional Burroughs texts (*The Wild Boys*, *Cities of the Red Night*).  
-- Implement **image cut-ups** (ala Burroughs/Brion Gysin) using diffusion models.  
-
-## 📂 Repository Structure  
-
-```
-novabot/  
-├── data/  
-│   ├── naked_lunch.txt  
-│   ├── soft_machine.txt  
-│   ├── ticket_exploded.txt  
-│   └── nova_express.txt  
-├── notebooks/  
-│   └── word_hoard_analysis.ipynb  
-├── scripts/  
-│   ├── preprocess.py  
-│   └── train.py  
-├── outputs/  
-│   └── examples/  
-├── models/  
-│   └── fine_tuned_gpt2/  
-└── README.md  
+## **Usage**  
+### **1. Pure Markov Mode**  
+```python
+python markov.py --seed "clinic" --length 20
 ```  
+**Output**:  
+> *"clinic smells of rust and ether... the syringe priest laughs in dank rooms"*  
 
-## 🛠️ Installation  
+### **2. Hybrid (Markov + GPT-2) Mode**  
+```python
+python hybrid_generator.py --seed "junk" --max_length 50 --temperature 0.7
+```  
+**Output**:  
+> *"junk whispers through the syringe streets where typewriters vomit ectoplasmic laughter—a virus of peeling wallpaper and insect screams."*  
 
-1. Clone the repo:  
-   ```sh  
-   git clone https://github.com/[yourusername]/novabot.git  
-   cd novabot  
-   ```  
+### **3. Override Vocabulary**  
+Replace `hoard.txt` with your own word list to change constraints.  
 
-2. Install dependencies:  
-   ```sh  
-   pip install -r requirements.txt  # (PyTorch, transformers, numpy, etc.)  
-   ```  
+---
 
-3. Run preprocessing & training:  
-   ```sh  
-   python scripts/preprocess.py  
-   python scripts/train.py  
-   ```  
+## **Requirements**  
+```text
+Python >= 3.8  
+numpy  
+torch  
+transformers  
+datasets  
+```  
+Install:  
+```bash
+pip install numpy torch transformers datasets
+```
 
-## 💡 Example Output  
+---
 
-**Prompt:** `"the virus is"`  
+## **Customization**  
+- **Style**: Adjust `temperature` (0.3–1.0) for more/less randomness.  
+- **Vocabulary**: Edit `hoard.txt` to permit/disallow specific words.  
+- **Output Length**: Set `--length` in Markov or `--max_length` in GPT-2.  
 
-**Novabot:**  
-> *the virus is a green sunset in the terminal sewer—  
-> flesh machines whisper in the hotel rooms of the irradiated  
-> and the word itself crawls like a centipede made of typewriter keys*  
+---
 
-## 🔗 References  
+## **Why This Works**  
+- **Markov Chains** ensure vocabulary compliance and baseline coherence.  
+- **GPT-2** adds stylistic flourishes while respecting constraints via `bad_words_ids`.  
+- **Lightweight**: Hybrid approach reduces GPU dependency (MacBook-friendly).  
 
-- William S. Burroughs, *The Cut-Up Method of Brion Gysin* (1963)  
-- HuggingFace [Transformers](https://huggingface.co/docs/transformers/index)  
-- *Naked Lunch* @ [OpenAIRE](https://explore.openaire.eu/) (public domain)  
+---
+
+## **Example Outputs**  
+| Seed          | Generated Passage |  
+|---------------|-------------------|  
+| `"needle"`    | *"needle streets hum with static... a boy’s spine dissolves into typewriter glue."* |  
+| `"mugwump"`   | *"mugwump chemistry in a bathtub—rectal spasms echo through the hotel lobbies of hell."* |  
+
+---
+
+## **Limitations**  
+- **Repetition**: Markov chains may loop; mitigated by `repetition_penalty` in GPT-2.  
+- **Hardware**: GPT-2 fine-tuning requires a modern CPU/GPU (slow on base MacBook Air).  
+
+---
+
+**License**: MIT  
+**Author**: [Your Name]  
+
+--- 
+
+Let me know if you’d like to emphasize specific features or add setup instructions!
 
